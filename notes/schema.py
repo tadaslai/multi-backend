@@ -1,7 +1,7 @@
+from datetime import date
 import graphene
 from graphene_django import DjangoObjectType
 from .models import Note
-from django.db import models
 
 
 class NoteType(DjangoObjectType):
@@ -35,7 +35,7 @@ class NoteEditInput(graphene.InputObjectType):
 
 class CreateNote(graphene.Mutation):
     class Arguments:
-        input = NoteInput(required=True)
+        input = NoteEditInput(required=True)
 
     note = graphene.Field(NoteType)
 
@@ -43,8 +43,8 @@ class CreateNote(graphene.Mutation):
     def mutate(cls, root, info, input):
         note = Note()
         note.title = input.title
-        note.pub_date = input.pub_date
         note.description = input.description
+        note.pub_date = date.today()
         note.save()
         return CreateNote(note=note)
 
@@ -55,6 +55,7 @@ class UpdateNote(graphene.Mutation):
         id = graphene.ID()
 
     note = graphene.Field(NoteType)
+
     @classmethod
     def mutate(cls, root, info, input, id):
         note = Note.objects.get(pk=id)
